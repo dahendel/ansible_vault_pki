@@ -1,4 +1,4 @@
-Vault_Certs
+ansible_vault_pki
 =========
 
 Create and Delete PKI Backends in Hashicorp Vault. Created to have no additional dependencies
