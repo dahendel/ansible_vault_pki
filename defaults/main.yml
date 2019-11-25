@@ -1,0 +1,29 @@
+---
+remove_ca: false
+save_certs: true
+domain: example.com
+local_cert_path: "{{playbook_dir}}"
+ca_ttl: 87600h
+intermediate_ttl: 43800h
+ca_secret_name: example
+
+root_ca_data:
+  generate_signing_key: true
+  path: "{{ca_secret_name}}"
+  type: pki
+  config:
+    max_lease_ttl: "{{ca_ttl}}"
+
+intermediate_cert_data:
+  type: pki
+  config:
+    max_lease_ttl: "{{intermediate_ttl}}"
+# defaults file for vault_certs
+
+pki_roles:
+  - name: example-local
+    config:
+      allowed_domains: "{{domain}}"
+      allow_subdomains: true
+      max_ttl: 720h
+
