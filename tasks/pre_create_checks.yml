@@ -1,18 +1,18 @@
 ---
-- name: "Pre-Checks | Checking for {{ca_secret_name}}"
+- name: "Pre-Checks | Checking for {{ ca_secret_name }}"
   uri:
-    url: "{{lookup('env', 'VAULT_ADDR')}}/v1/sys/internal/ui/mounts/{{ca_secret_name}}"
+    url: "{{ lookup('env', 'VAULT_ADDR') }}/v1/sys/internal/ui/mounts/{{ ca_secret_name }}"
     headers:
-      X-Vault-Token: "{{lookup('env', 'VAULT_TOKEN')}}"
+      X-Vault-Token: "{{ lookup('env', 'VAULT_TOKEN') }}"
     method: GET
   register: pki_check
   ignore_errors: yes
 
-- name: "Pre-Checks | Checking for {{ca_secret_name}}_int"
+- name: "Pre-Checks | Checking for {{ ca_secret_name }}_int"
   uri:
-    url: "{{lookup('env', 'VAULT_ADDR')}}/v1/sys/internal/ui/mounts/{{ca_secret_name}}_int"
+    url: "{{ lookup('env', 'VAULT_ADDR') }}/v1/sys/internal/ui/mounts/{{ ca_secret_name }}_int"
     headers:
-      X-Vault-Token: "{{lookup('env', 'VAULT_TOKEN')}}"
+      X-Vault-Token: "{{ lookup('env', 'VAULT_TOKEN') }}"
     method: GET
   ignore_errors: yes
   register: pki_int_check

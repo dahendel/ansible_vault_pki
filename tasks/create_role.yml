@@ -1,14 +1,14 @@
 ---
-- name: "Create Role | Creating roles for PKI backend {{ca_secret_name}}"
+- name: "Create Role | Creating roles for PKI backend {{ ca_secret_name }}"
   uri:
-    url: "{{lookup('env', 'VAULT_ADDR')}}/v1/{{ca_secret_name}}_int/roles/{{item.name}}"
+    url: "{{   lookup('env', 'VAULT_ADDR') }}/v1/{{ ca_secret_name }}_int/roles/{{ item.name }}"
     headers:
-      X-Vault-Token: "{{lookup('env', 'VAULT_TOKEN')}}"
+      X-Vault-Token: "{{ lookup('env', 'VAULT_TOKEN') }}"
     method: POST
-    body: "{{item.config}}"
+    body: "{{ item.config }}"
     body_format: json
   register: pki_role_create
   failed_when: pki_role_create.status != 204
   ignore_errors: yes
   tags: always
-  with_items: "{{pki_roles}}"
+  with_items: "{{ pki_roles }}"

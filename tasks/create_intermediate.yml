@@ -1,26 +1,26 @@
 ---
-- name: "Create Intermeddiate | Enable PKI backend {{ca_secret_name}}"
+- name: "Create Intermeddiate | Enable PKI backend {{ ca_secret_name }}"
   uri:
-    url: "{{lookup('env', 'VAULT_ADDR')}}/v1/sys/mounts/{{ca_secret_name}}_int"
+    url: "{{ lookup('env', 'VAULT_ADDR') }}/v1/sys/mounts/{{ ca_secret_name }}_int"
     headers:
-      X-Vault-Token: "{{lookup('env', 'VAULT_TOKEN')}}"
+      X-Vault-Token: "{{ lookup('env', 'VAULT_TOKEN') }}"
     method: POST
-    body: "{{intermediate_cert_data}}"
+    body: "{{ intermediate_cert_data }}"
     body_format: json
   register: pki_init_create
   failed_when: pki_init_create.status != 204
   ignore_errors: yes
   tags: always
 
-- name: "Create Intermediate | Generating intermediate cert for {{ca_secret_name}}"
+- name: "Create Intermediate | Generating intermediate cert for {{ ca_secret_name }}"
   uri:
-    url: "{{lookup('env', 'VAULT_ADDR')}}/v1/{{ca_secret_name}}_int/intermediate/generate/internal"
+    url: "{{ lookup('env', 'VAULT_ADDR') }}/v1/{{ ca_secret_name }}_int/intermediate/generate/internal"
     headers:
-      X-Vault-Token: "{{lookup('env', 'VAULT_TOKEN')}}"
+      X-Vault-Token: "{{ lookup('env', 'VAULT_TOKEN') }}"
     method: POST
     body:
-      common_name: "{{domain}}"
-      ttl: "{{intermediate_ttl}}"
+      common_name: "{{ domain }}"
+      ttl: "{{ intermediate_ttl }}"
     body_format: json
   register: int_generate
   tags: always
@@ -30,38 +30,38 @@
 #
 - name: Create Intermediate | Grabbing intermediate cert
   set_fact:
-    int_certificate: "{{int_generate['json']['data']['csr']}}"
+    int_certificate: "{{ int_generate['json']['data']['csr'] }}"
   tags: always
 
-- name: " Create Intermediate | Signing intermediate cert for {{ca_secret_name}}"
+- name: " Create Intermediate | Signing intermediate cert for {{ ca_secret_name }}"
   uri:
-    url: "{{lookup('env', 'VAULT_ADDR')}}/v1/{{ca_secret_name}}/root/sign-intermediate"
+    url: "{{ lookup('env', 'VAULT_ADDR') }}/v1/{{ ca_secret_name }}/root/sign-intermediate"
     headers:
-      X-Vault-Token: "{{lookup('env', 'VAULT_TOKEN')}}"
+      X-Vault-Token: "{{ lookup('env', 'VAULT_TOKEN') }}"
     method: POST
     body:
-      csr: "{{int_certificate}}"
+      csr: "{{ int_certificate }}"
       format: "pem_bundle"
-      ttl: "{{intermediate_ttl}}"
+      ttl: "{{ intermediate_ttl }}"
     body_format: json
   register: signed_int
   tags: always
 
-- name: " Create Intermediate | Adding signed intermediate cert for {{ca_secret_name}}"
+- name: " Create Intermediate | Adding signed intermediate cert for {{ ca_secret_name }}"
   uri:
-    url: "{{lookup('env', 'VAULT_ADDR')}}/v1/{{ca_secret_name}}_int/intermediate/set-signed"
+    url: "{{ lookup('env', 'VAULT_ADDR') }}/v1/{{ ca_secret_name }}_int/intermediate/set-signed"
     headers:
-      X-Vault-Token: "{{lookup('env', 'VAULT_TOKEN')}}"
+      X-Vault-Token: "{{ lookup('env', 'VAULT_TOKEN') }}"
     method: POST
     body:
-      certificate: "{{signed_int['json']['data']['certificate']}}"
+      certificate: "{{ signed_int['json']['data']['certificate'] }}"
     body_format: json
   register: apply_signed_int
   failed_when: pki_init_create.status != 204
   tags: always
 
-- name: "Create Intermediate | Writting intermediate ca to local {{local_cert_path}}/{{ca_secret_name}}_int.pem"
+- name: "Create Intermediate | Writting intermediate ca to local {{ local_cert_path }}/{{ ca_secret_name }}_int.pem"
   copy:
-    content: "{{signed_int['json']['data']['certificate']}}"
-    dest: "{{local_cert_path}}/{{ca_secret_name}}_int.pem"
+    content: "{{ signed_int['json']['data']['certificate'] }}"
+    dest: "{{ local_cert_path }}/{{ ca_secret_name }}_int.pem"
   when: save_certs

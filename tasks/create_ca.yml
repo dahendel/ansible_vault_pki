@@ -1,38 +1,38 @@
 ---
-- name: "Create | Enable PKI backend {{ca_secret_name}}"
+- name: "Create | Enable PKI backend {{ ca_secret_name }}"
   uri:
-    url: "{{lookup('env', 'VAULT_ADDR')|default('localhost:1234')}}/v1/sys/mounts/{{ca_secret_name}}"
+    url: "{{ lookup('env', 'VAULT_ADDR') }}/v1/sys/mounts/{{ ca_secret_name }}"
     headers:
-      X-Vault-Token: "{{lookup('env', 'VAULT_TOKEN')}}"
+      X-Vault-Token: "{{ lookup('env', 'VAULT_TOKEN') }}"
     method: POST
-    body: "{{root_ca_data}}"
+    body: "{{ root_ca_data }}"
     body_format: json
   register: pki_create
   failed_when: pki_create.status != 204
   ignore_errors: yes
   tags: always
 
-- name: "Create | Generating root cert for {{ca_secret_name}}"
+- name: "Create | Generating root cert for {{ ca_secret_name }}"
   uri:
-    url: "{{lookup('env', 'VAULT_ADDR')}}/v1/{{ca_secret_name}}/root/generate/internal"
+    url: "{{ lookup('env', 'VAULT_ADDR') }}/v1/{{ ca_secret_name }}/root/generate/internal"
     headers:
-      X-Vault-Token: "{{lookup('env', 'VAULT_TOKEN')}}"
+      X-Vault-Token: "{{ lookup('env', 'VAULT_TOKEN') }}"
     method: POST
     body:
-      common_name: "{{domain}}"
-      ttl: "{{ca_ttl}}"
+      common_name: "{{ domain }}"
+      ttl: "{{ ca_ttl }}"
     body_format: json
   register: root_generate
   tags: always
 
 - name: Create Root | Grabbing intermediate cert Serial number
   set_fact:
-    root_certificate: "{{root_generate['json']['data']['certificate']}}"
-    root_serial_number: "{{root_generate['json']['data']['serial_number']}}"
+    root_certificate: "{{ root_generate['json']['data']['certificate'] }}"
+    root_serial_number: "{{ root_generate['json']['data']['serial_number'] }}"
   tags: always
 
-- name: "Create Root | Writting root ca to local {{local_cert_path}}/{{ca_secret_name}}.pem"
+- name: "Create Root | Writting root ca to local {{ local_cert_path }}/{{ ca_secret_name }}.pem"
   copy:
-    content: "{{root_certificate}}"
-    dest: "{{local_cert_path}}/{{ca_secret_name}}.pem"
+    content: "{{ root_certificate }}"
+    dest: "{{ local_cert_path }}/{{ ca_secret_name }}.pem"
   when: save_certs

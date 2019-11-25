@@ -1,14 +1,14 @@
 ---
-- name: "Remove | Deleting {{ca_secret_name}}"
+- name: "Remove | Deleting {{ ca_secret_name }}"
   uri:
-    url: "{{lookup('env', 'VAULT_ADDR')}}/v1/sys/mounts/{{item}}"
+    url: "{{ lookup('env', 'VAULT_ADDR') }}/v1/sys/mounts/{{ item  }}"
     headers:
-      X-Vault-Token: "{{lookup('env', 'VAULT_TOKEN')}}"
+      X-Vault-Token: "{{  lookup('env', 'VAULT_TOKEN') }}"
     method: DELETE
   register: pki_delete
   failed_when: pki_delete.status != 204
   with_items:
-    - "{{ca_secret_name}}"
-    - "{{ca_secret_name}}_int"
+    - "{{ ca_secret_name }}"
+    - "{{ ca_secret_name }}_int"
 
 - meta: end_play
